@@ -30,7 +30,6 @@ public class Ring {
 
     public void update() {
         if (robots.size() == 1) {
-            System.out.println(robots.get(0).getTally());
             return;
         }
 
@@ -43,7 +42,7 @@ public class Ring {
                 Robot currRobot = robots.get(i);
 
                 for (int j=i+1; j<robots.size(); j++) {
-                    if (currRobot.getNode() == robots.get(j).getNode()) {
+                    if (nodeDistance(currRobot.getNode(), robots.get(j).getNode(), speed)) {
                         currRobot.eat(robots.get(j));
                         robots.remove(j);
                         flag = true;
@@ -57,9 +56,31 @@ public class Ring {
         robots = newList;
     }
 
+    public boolean nodeDistance(Node a, Node b, int dist) {
+        if (a == b) return true;
+
+        Node temp = a;
+        for (int i=0; i<dist; i++) {
+            temp = temp.getLeft();
+            if (temp == b) return true;
+        }
+
+        temp = a;
+        for (int i=0; i<dist; i++) {
+            temp = temp.getRight();
+            if (temp == b) return true;
+        }
+
+        return false;
+    }
+
     public void draw() {
         for (Node n : nodes) n.draw();
         for (Robot r : robots) r.draw();
     }
+
+    public int getNumRobots() { return numRobots; }
+    public int getNumNodes() { return numNodes; }
+    public int getSpeed() { return speed; }
 
 }

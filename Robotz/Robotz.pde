@@ -6,6 +6,7 @@ float screenX, screenY;
 int sensitivity = 50;
 
 Ring ring;
+int robots, nodes, speed, delay;
 
 //initial screen settings
 void settings() {
@@ -18,15 +19,31 @@ void setup() {
     screenY = screen[1]/2;
     frameRate(30);
 
-    ring = new Ring(42, 111, 1);
+    delay = 100;
+    robots = 3;
+    nodes = 15;
+    speed = 1;
+    ring = new Ring(robots, nodes, speed);
 }
 
 void draw() {
     ring.update();
-    //delay(100);
+    delay(delay);
     background(255);
 
     drawRing(ring);
+
+    drawGUI();
+}
+
+void drawGUI() {
+    textSize(32);
+    textAlign(CENTER);
+    text("Delay (F, R): " + str(delay), screen[0]/2, screen[1]/2 - 128);
+    text("Robots (A, Q): " + str(robots), screen[0]/2, screen[1]/2 - 64);
+    text("Nodes (S, W): " + str(nodes), screen[0]/2, screen[1]/2);
+    text("Speed (D, E): " + str(speed), screen[0]/2, screen[1]/2 + 64);
+    text("Enter to create", screen[0]/2, screen[1]/2 + 128);
 }
 
 void drawRing(Ring r) {
@@ -37,15 +54,16 @@ void drawRing(Ring r) {
 }
 
 void keyPressed() {
-    if (key == CODED) {
-        if (keyCode == UP) {
-            screenY += sensitivity;
-        } else if (keyCode == DOWN) {
-            screenY -= sensitivity;
-        } else if (keyCode == RIGHT) {
-            screenX -= sensitivity;
-        } else if (keyCode == LEFT) {
-            screenX += sensitivity;
-        }
-    }
+    final int k = keyCode;
+
+    if (k == 'A' && robots > 1) robots -= 1;
+    if (k == 'Q') robots += 1;
+    if (k == 'S' && nodes > 1) nodes -= 1;
+    if (k == 'W') nodes += 1;
+    if (k == 'D' && speed > 1) speed -= 1;
+    if (k == 'E') speed += 1;
+    if (k == 'F' && delay > 10) delay -= 10;
+    if (k == 'R') delay += 10;
+
+    if (k == ENTER) ring = new Ring(robots, nodes, speed);
 }
