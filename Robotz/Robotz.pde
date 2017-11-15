@@ -1,12 +1,24 @@
-import java.util.*;
+/*
+    Author: Alexandre Skipper
+    Date: November 2017
+*/
+
+import java.util.ArrayList;
+import java.io.FileReader; 
+import java.io.BufferedReader; 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 //Window params
 int[] screen = { 1080, 1080 };
 float screenX, screenY;
 int sensitivity = 50;
 
+//some global variables
 Ring ring;
-int robots, nodes, speed, delay;
+int robots, nodes, speed, delay; //robot and node counts, robot speed, delay between frames
+boolean runGUI = false;
+ArrayList< ArrayList<Integer> > testCases;
 
 //initial screen settings
 void settings() {
@@ -19,26 +31,75 @@ void setup() {
     screenY = screen[1]/2;
     frameRate(30);
 
-    delay = 500;
+    delay = 250;
     robots = 3;
     nodes = 15;
     speed = 1;
     ring = new Ring(robots, nodes, speed);
+
+    readConfig();
 }
 
+//read test cases and settings from config file
+void readConfig() {
+    BufferedReader br = null;
+    try {
+        br = new BufferedReader(new FileReader(new File(sketchPath("config.cfg"))));
+        String line = br.readLine();
+        runGUI = Integer.parseInt(line) == 0 ? false : true;
+
+        testCases = new ArrayList< ArrayList<Integer> >();
+        line = br.readLine();
+        while (line != null) {
+            ArrayList<Integer> testCase = new ArrayList<Integer>();
+            for (String i : line.split(","))
+                testCase.add(Integer.parseInt(i));
+            testCases.add(testCase);
+            
+            line = br.readLine();
+        }
+    } catch (FileNotFoundException e) {
+        super.exit();
+    } catch (IOException e) {
+        super.exit();
+    }
+}
+
+//main program loop
 void draw() {
-    delay(delay);
-    background(120, 120, 120);
+    if (runGUI) {
+        delay(delay);
+        background(255);
 
-    ring.updateRobotPositions();
+        ring.updateRobotPositions(); //move robots
 
-    drawRing(ring);
-    drawGUI();
+        drawRing(ring);
+        drawGUI();
 
-    textAlign(LEFT, TOP);
-    ring.updateRobotList();
+        textAlign(LEFT, TOP);
+        ring.updateRobotList(); //check for collisions and merge robots
+    } else {
+        runTestCases();
+    }
 }
 
+//run test cases without the GUI
+void runTestCases() {
+    for (int i=0; i<testCases.size(); i++) {
+        Log log = new Log(testCases.get(i).get(0), testCases.get(i).get(1), testCases.get(i).get(2));
+
+        for (int j=0; j<testCases.get(i).get(3); j++) {
+            ring = new Ring(testCases.get(i).get(0), testCases.get(i).get(1), testCases.get(i).get(2));
+            ring.runTest();
+            log.addEntry(str(ring.getIterations()));
+        }
+
+        log.saveToFile();
+    }
+    super.exit();
+}
+
+//draw the UI
 void drawGUI() {
     textSize(32);
     textAlign(CENTER);
@@ -51,6 +112,7 @@ void drawGUI() {
     text("Iterations: " + str(ring.getIterations()), 5, 5);
 }
 
+//draw the ring (nodes & robots)
 void drawRing(Ring r) {
     pushMatrix();
     translate(screenX, screenY);
@@ -58,6 +120,7 @@ void drawRing(Ring r) {
     popMatrix();
 }
 
+//check for user input
 void keyPressed() {
     final int k = keyCode;
 

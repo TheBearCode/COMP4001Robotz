@@ -1,4 +1,7 @@
-
+/*
+    Author: Alexandre Skipper
+    Date: November 2017
+*/
 
 public class Node {
     
@@ -14,6 +17,7 @@ public class Node {
         radius = 10;
     }
 
+    //draw the node
     public void draw() {
         fill(0);
         strokeWeight(1);
